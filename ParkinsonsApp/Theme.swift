@@ -8,20 +8,32 @@
 import SwiftUI
 
 enum Theme {
-    // Core brand colors
-    static let background = Color(hex: 0xFFF5E4) // #fff5e4
-    static let text = Color(hex: 0x794100)       // #794100
+    // Core Stigma identity
+    static let background = Color(hex: 0xFAF5EB) // Cream
+    static let text = Color(hex: 0x8B6914)       // Brown
+    static let accent = Color(hex: 0xF28DB2)     // Pink asterisk
+    
+    static let cardBackground = Color(hex: 0xF0E8D8) // Darker cream for surfaces
+    
+    // Status/Tag colors
+    static let green = Color(hex: 0xA8D84E)
+    static let cyan  = Color(hex: 0x7DD3E8)
+    static let orange = Color(hex: 0xF5A623)
 
-    // Tulip palette
-    static let tulipGreen = Color(hex: 0xB4FF48) // #b4ff48
-    static let tulipCyan  = Color(hex: 0x5CE1E6) // #5ce1e6
-    static let tulipPink  = Color(hex: 0xFF64B8) // #ff64b8
-    static let tulipOrange = Color(hex: 0xFFAE42) // #ffae42
-    static let tulipPurple = Color(hex: 0x8C52FF) // #8c52ff
+    // Glass/Surface helpers
+    static var glassBackground: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(cardBackground)
+            .shadow(color: text.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
 
-    // Common card styling
-    static func cardBackground(for color: Color) -> some View {
-        color.opacity(0.18)
+    static func pill(tint: Color) -> some View {
+        Capsule(style: .continuous)
+            .fill(tint.opacity(0.2))
+            .overlay(
+                Capsule(style: .continuous)
+                    .stroke(tint.opacity(0.3), lineWidth: 1)
+            )
     }
 }
 
@@ -35,38 +47,43 @@ extension Color {
     }
 }
 
-// A reusable card style
-struct TulipCard<Content: View>: View {
-    let accent: Color
-    let title: String
+// Stigma standardized card style
+struct StigmaCard<Content: View>: View {
     @ViewBuilder var content: Content
 
-    init(title: String, accent: Color, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.accent = accent
+    init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(accent)
-                    .frame(width: 10, height: 10)
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(Theme.text)
-            }
+        VStack(alignment: .leading, spacing: 12) {
             content
-                .foregroundStyle(Theme.text.opacity(0.9))
-                .font(.subheadline)
         }
-        .padding(14)
-        .background(Theme.cardBackground(for: accent))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(accent.opacity(0.25), lineWidth: 1)
-        )
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.glassBackground)
+    }
+}
+
+// Colorful pill badge
+struct PillBadge: View {
+    let text: String
+    let tint: Color
+    var systemImage: String? = nil
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.footnote.weight(.semibold))
+            }
+            Text(text)
+                .font(.footnote.weight(.semibold))
+                .fontDesign(.rounded)
+        }
+        .foregroundStyle(Theme.text)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Theme.pill(tint: tint))
     }
 }
