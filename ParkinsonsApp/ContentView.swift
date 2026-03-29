@@ -48,6 +48,12 @@ struct ContentView: View {
                     Text("Map")
                 }
 
+            FolksListView()
+                .tabItem {
+                    Image(systemName: "person.3.fill")
+                    Text("Community")
+                }
+
             ProfileView()
                 .tabItem {
                     Image(systemName: "person.crop.circle.fill")

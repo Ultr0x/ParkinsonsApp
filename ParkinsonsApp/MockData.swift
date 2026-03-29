@@ -66,7 +66,12 @@ let samplePlaces: [CommunityPlace] = [
         accessibility: ["Free parking", "Bus accessible", "On-site cafe"],
         highlights: ["Qualified PD-trained instructors", "All ability levels welcome"],
         memberIDs: [folkID_margaret, folkID_david, folkID_tom, folkID_janet],
-        activityIDs: [actID_fridayGym, actID_balanceWorkshop]
+        activityIDs: [actID_fridayGym, actID_balanceWorkshop],
+        parkinsonsFriendly: true,
+        displaysBeacon: true,
+        staffAwarenessTraining: true,
+        seatingAvailable: true,
+        calmEnvironment: true
     ),
     CommunityPlace(
         id: placeID_walkingFootball,
@@ -83,7 +88,12 @@ let samplePlaces: [CommunityPlace] = [
         accessibility: ["3G pitch", "Adapted for PD", "NHS supported"],
         highlights: ["Chelsea FC trained coaches", "Safe & inclusive"],
         memberIDs: [folkID_george, folkID_carlos, folkID_tom, folkID_mike],
-        activityIDs: [actID_mondayFootball]
+        activityIDs: [actID_mondayFootball],
+        parkinsonsFriendly: true,
+        displaysBeacon: false,
+        staffAwarenessTraining: true,
+        seatingAvailable: false,
+        calmEnvironment: true
     ),
     CommunityPlace(
         id: placeID_camdenMeetup,
@@ -100,7 +110,12 @@ let samplePlaces: [CommunityPlace] = [
         accessibility: ["Step-free entrance", "Cafe setting", "Evening sessions"],
         highlights: ["Working age focus", "Informal & welcoming", "Carers welcome"],
         memberIDs: [folkID_aisha, folkID_priya, folkID_helen, folkID_david, folkID_carlos],
-        activityIDs: [actID_camdenSocial, actID_newMembersWelcome]
+        activityIDs: [actID_camdenSocial, actID_newMembersWelcome],
+        parkinsonsFriendly: false,
+        displaysBeacon: true,
+        staffAwarenessTraining: true,
+        seatingAvailable: true,
+        calmEnvironment: true
     ),
     CommunityPlace(
         id: placeID_powerUpParkies,
@@ -117,7 +132,12 @@ let samplePlaces: [CommunityPlace] = [
         accessibility: ["All abilities", "Supportive coaches"],
         highlights: ["Reduces falls risk", "Builds confidence", "Community atmosphere"],
         memberIDs: [folkID_george, folkID_helen, folkID_mike, folkID_margaret],
-        activityIDs: [actID_thursdayPower]
+        activityIDs: [actID_thursdayPower],
+        parkinsonsFriendly: false,
+        displaysBeacon: false,
+        staffAwarenessTraining: true,
+        seatingAvailable: true,
+        calmEnvironment: true
     ),
     CommunityPlace(
         id: placeID_parkyBlinders,
@@ -134,7 +154,12 @@ let samplePlaces: [CommunityPlace] = [
         accessibility: ["All mobility levels", "Steps with railings", "No boxing experience needed"],
         highlights: ["Boxing England qualified", "Care partners welcome", "Mental & physical benefits"],
         memberIDs: [folkID_tom, folkID_carlos, folkID_david, folkID_aisha],
-        activityIDs: [actID_wedBoxing]
+        activityIDs: [actID_wedBoxing],
+        parkinsonsFriendly: false,
+        displaysBeacon: false,
+        staffAwarenessTraining: true,
+        seatingAvailable: true,
+        calmEnvironment: true
     ),
     CommunityPlace(
         id: placeID_wandsworthCafe,
@@ -151,7 +176,12 @@ let samplePlaces: [CommunityPlace] = [
         accessibility: ["Step-free", "Cafe setting", "Family friendly"],
         highlights: ["Informal & relaxed", "Everyone welcome", "Beautiful arts venue"],
         memberIDs: [folkID_janet, folkID_priya, folkID_margaret, folkID_helen, folkID_aisha],
-        activityIDs: [actID_cafeCatchUp]
+        activityIDs: [actID_cafeCatchUp],
+        parkinsonsFriendly: true,
+        displaysBeacon: true,
+        staffAwarenessTraining: true,
+        seatingAvailable: true,
+        calmEnvironment: true
     ),
 ]
 
@@ -168,7 +198,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Retired teacher who loves staying active. Regular at the Friday exercise group and always first to arrive. Enjoys painting watercolours and long walks in the park.",
         interests: ["Exercise", "Painting", "Walking", "Reading"],
         avatarColor: Theme.accent,
-        placeIDs: [placeID_exerciseGroup, placeID_powerUpParkies, placeID_wandsworthCafe]
+        placeIDs: [placeID_exerciseGroup, placeID_powerUpParkies, placeID_wandsworthCafe],
+        journeyStage: .livingWithIt,
+        experiences: [.handsShake, .tiredQuickly],
+        bodyDistribution: .oneSide,
+        bestTimeOfDay: .morning
     ),
     CommunityFolk(
         id: folkID_david,
@@ -180,7 +214,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Software developer diagnosed at 50. Passionate about raising awareness for young-onset Parkinson's. Attends the Camden working-age meet-ups regularly.",
         interests: ["Technology", "Boxing", "Photography", "Cooking"],
         avatarColor: Theme.cyan,
-        placeIDs: [placeID_exerciseGroup, placeID_camdenMeetup, placeID_parkyBlinders]
+        placeIDs: [placeID_exerciseGroup, placeID_camdenMeetup, placeID_parkyBlinders],
+        journeyStage: .recentlyDiagnosed,
+        experiences: [.handsShake, .anxiousSocially],
+        bodyDistribution: .oneSide,
+        bestTimeOfDay: .morning
     ),
     CommunityFolk(
         id: folkID_aisha,
@@ -192,7 +230,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Marketing consultant and mum of two. Recently diagnosed and finding community support invaluable. Loves the boxing sessions for both the physical and mental boost.",
         interests: ["Boxing", "Yoga", "Coffee", "Travel"],
         avatarColor: Color(hex: 0x8B5CF6),
-        placeIDs: [placeID_camdenMeetup, placeID_parkyBlinders, placeID_wandsworthCafe]
+        placeIDs: [placeID_camdenMeetup, placeID_parkyBlinders, placeID_wandsworthCafe],
+        journeyStage: .recentlyDiagnosed,
+        experiences: [.anxiousSocially, .tiredQuickly],
+        bodyDistribution: .oneSide,
+        bestTimeOfDay: .midday
     ),
     CommunityFolk(
         id: folkID_tom,
@@ -204,7 +246,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Former PE teacher who never lost his love of sport. You'll find him on the football pitch every Monday and in the boxing ring on Wednesdays. Always encouraging newcomers.",
         interests: ["Football", "Boxing", "Coaching", "Gardening"],
         avatarColor: Theme.green,
-        placeIDs: [placeID_exerciseGroup, placeID_walkingFootball, placeID_parkyBlinders]
+        placeIDs: [placeID_exerciseGroup, placeID_walkingFootball, placeID_parkyBlinders],
+        journeyStage: .livingWithIt,
+        experiences: [.moveSlowly, .handsShake, .tiredQuickly],
+        bodyDistribution: .bothSides,
+        bestTimeOfDay: .morning
     ),
     CommunityFolk(
         id: folkID_priya,
@@ -216,7 +262,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Architect who believes in the power of community. Helps organise the Camden meet-ups and is a regular at the Wandsworth cafe. Loves discussing design and art.",
         interests: ["Architecture", "Art", "Community", "Music"],
         avatarColor: Theme.orange,
-        placeIDs: [placeID_camdenMeetup, placeID_wandsworthCafe]
+        placeIDs: [placeID_camdenMeetup, placeID_wandsworthCafe],
+        journeyStage: .recentlyDiagnosed,
+        experiences: [.voiceQuiet, .anxiousSocially],
+        bodyDistribution: .oneSide,
+        bestTimeOfDay: .afternoon
     ),
     CommunityFolk(
         id: folkID_george,
@@ -228,7 +278,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Accountant by trade, footballer at heart. The walking football sessions have been a lifeline. Also attends strength training to keep on top of his fitness.",
         interests: ["Football", "Fitness", "Music", "Chess"],
         avatarColor: Color(hex: 0xE85D75),
-        placeIDs: [placeID_walkingFootball, placeID_powerUpParkies]
+        placeIDs: [placeID_walkingFootball, placeID_powerUpParkies],
+        journeyStage: .livingWithIt,
+        experiences: [.moveSlowly, .tiredQuickly],
+        bodyDistribution: .bothSides,
+        bestTimeOfDay: .midday
     ),
     CommunityFolk(
         id: folkID_helen,
@@ -240,7 +294,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Retired nurse who now dedicates her time to supporting others with Parkinson's. A calming presence at every meet-up and always has a kind word.",
         interests: ["Volunteering", "Knitting", "Tea", "Walking"],
         avatarColor: Theme.cyan,
-        placeIDs: [placeID_camdenMeetup, placeID_powerUpParkies, placeID_wandsworthCafe]
+        placeIDs: [placeID_camdenMeetup, placeID_powerUpParkies, placeID_wandsworthCafe],
+        journeyStage: .livingWithIt,
+        experiences: [.tiredQuickly, .voiceQuiet],
+        bodyDistribution: .allOver,
+        bestTimeOfDay: .morning
     ),
     CommunityFolk(
         id: folkID_carlos,
@@ -252,7 +310,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Chef and restaurant owner. Youngest member of the walking football group. Brings homemade empanadas to the Camden meet-ups. Diagnosed young and determined to stay active.",
         interests: ["Cooking", "Football", "Boxing", "Cycling"],
         avatarColor: Theme.green,
-        placeIDs: [placeID_walkingFootball, placeID_camdenMeetup, placeID_parkyBlinders]
+        placeIDs: [placeID_walkingFootball, placeID_camdenMeetup, placeID_parkyBlinders],
+        journeyStage: .recentlyDiagnosed,
+        experiences: [.handsShake, .moveSlowly],
+        bodyDistribution: .oneSide,
+        bestTimeOfDay: .afternoon
     ),
     CommunityFolk(
         id: folkID_janet,
@@ -264,7 +326,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "The heart of the Friday exercise group. Despite being in advanced stage, Janet's positive attitude inspires everyone. Loves the social side of the cafe meet-ups.",
         interests: ["Exercise", "Socialising", "Baking", "Puzzles"],
         avatarColor: Theme.accent,
-        placeIDs: [placeID_exerciseGroup, placeID_wandsworthCafe]
+        placeIDs: [placeID_exerciseGroup, placeID_wandsworthCafe],
+        journeyStage: .longTerm,
+        experiences: [.moveSlowly, .handsShake, .tiredQuickly, .voiceQuiet],
+        bodyDistribution: .allOver,
+        bestTimeOfDay: .morning
     ),
     CommunityFolk(
         id: folkID_mike,
@@ -276,7 +342,11 @@ let sampleFolk: [CommunityFolk] = [
         bio: "Electrician and lifelong Chelsea fan. Jumped at the chance to join walking football at the Chelsea FC Foundation. Also building strength at Power Up Parkies.",
         interests: ["Football", "DIY", "Strength Training", "Dogs"],
         avatarColor: Color(hex: 0x8B5CF6),
-        placeIDs: [placeID_walkingFootball, placeID_powerUpParkies]
+        placeIDs: [placeID_walkingFootball, placeID_powerUpParkies],
+        journeyStage: .recentlyDiagnosed,
+        experiences: [.handsShake, .tiredQuickly],
+        bodyDistribution: .oneSide,
+        bestTimeOfDay: .midday
     ),
 ]
 
@@ -446,3 +516,4 @@ let sampleVenues = [
         isCertified: false
     )
 ]
+

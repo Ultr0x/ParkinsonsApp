@@ -8,7 +8,18 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("userName") private var userName: String = ""
+    @AppStorage("onboardingJourneyStage") private var journeyStageRaw: String = ""
+    @AppStorage("onboardingExperiences") private var experiencesRaw: String = ""
+    @AppStorage("onboardingBodyDistribution") private var bodyDistributionRaw: String = ""
+    @AppStorage("onboardingBestTime") private var bestTimeRaw: String = ""
+    @AppStorage("detailedSymptomProfile") private var profileData: String = ""
+    
     @State private var isDiscoverable = sampleUser.isDiscoverable
+    @State private var showSignOutAlert = false
+    @State private var showDeleteAlert = false
+    @State private var showEditSheet = false
     
     var body: some View {
         NavigationStack {
@@ -18,6 +29,7 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         profileHeader
+                        onboardingSummaryCard
                         journeyCard
                         charmSettingsCard
                         communityStatsCard
@@ -31,8 +43,36 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.clear, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .alert("Sign Out", isPresented: $showSignOutAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Sign Out", role: .destructive) { resetProfile() }
+            } message: {
+                Text("You'll return to the welcome screen and can set up your profile again.")
+            }
+            .alert("Delete Account", isPresented: $showDeleteAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete Everything", role: .destructive) { resetProfile() }
+            } message: {
+                Text("This will remove all your data and return you to the start. This cannot be undone.")
+            }
+            .sheet(isPresented: $showEditSheet) {
+                EditOnboardingView()
+            }
         }
         .preferredColorScheme(.light)
+    }
+    
+    // MARK: - Reset
+    
+    private func resetProfile() {
+        // Clear all onboarding and profile data
+        userName = ""
+        journeyStageRaw = ""
+        experiencesRaw = ""
+        bodyDistributionRaw = ""
+        bestTimeRaw = ""
+        profileData = ""
+        hasCompletedOnboarding = false
     }
     
     // MARK: - Components
@@ -44,17 +84,21 @@ struct ProfileView: View {
                     .fill(Theme.accent.opacity(0.2))
                     .frame(width: 80, height: 80)
                 
-                Text(sampleUser.name.prefix(1))
+                Text(userName.isEmpty ? "?" : String(userName.prefix(1)))
                     .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(Theme.accent)
             }
             
             VStack(alignment: .leading, spacing: 6) {
-                Text(sampleUser.name)
+                Text(userName.isEmpty ? sampleUser.name : userName)
                     .font(.title2.weight(.bold))
                     .foregroundStyle(Theme.text)
                 
-                if let year = sampleUser.diagnosisYear {
+                if !journeyStageRaw.isEmpty {
+                    Text(journeyStageRaw)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Theme.text.opacity(0.8))
+                } else if let year = sampleUser.diagnosisYear {
                     Text("Diagnosed \(String(year)) · \(sampleUser.approximateStage.rawValue)")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(Theme.text.opacity(0.8))
@@ -64,11 +108,70 @@ struct ProfileView: View {
             Spacer()
             
             Button {
-                // Edit Profile
+                showEditSheet = true
             } label: {
                 Image(systemName: "pencil.circle.fill")
                     .font(.title)
                     .foregroundStyle(Theme.text.opacity(0.5))
+            }
+        }
+    }
+    
+    // MARK: - Onboarding Summary Card
+    
+    private var onboardingSummaryCard: some View {
+        StigmaCard {
+            HStack {
+                Text("Your Profile")
+                    .font(.headline.weight(.heavy))
+                    .foregroundStyle(Theme.text)
+                Spacer()
+                Button {
+                    showEditSheet = true
+                } label: {
+                    Text("Edit")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 10) {
+                if !journeyStageRaw.isEmpty {
+                    profileRow(icon: "road.lanes", label: "Journey", value: journeyStageRaw)
+                }
+                
+                if !experiencesRaw.isEmpty,
+                   let data = experiencesRaw.data(using: .utf8),
+                   let experiences = try? JSONDecoder().decode([String].self, from: data) {
+                    profileRow(icon: "eye", label: "Experiences", value: experiences.joined(separator: ", "))
+                }
+                
+                if !bodyDistributionRaw.isEmpty {
+                    profileRow(icon: "figure.arms.open", label: "Affected area", value: bodyDistributionRaw)
+                }
+                
+                if !bestTimeRaw.isEmpty {
+                    profileRow(icon: "clock.fill", label: "Best time", value: bestTimeRaw)
+                }
+            }
+            .padding(.top, 4)
+        }
+    }
+    
+    private func profileRow(icon: String, label: String, value: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Theme.accent)
+                .frame(width: 20)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.text.opacity(0.5))
+                Text(value)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.text)
             }
         }
     }
@@ -217,6 +320,40 @@ struct ProfileView: View {
     
     private var settingsSection: some View {
         VStack(spacing: 0) {
+            // My Symptom Profile — comprehensive editor
+            NavigationLink {
+                SymptomProfileView()
+            } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(Theme.accent.opacity(0.15))
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "sparkles")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("My Symptom Profile")
+                            .font(.subheadline.weight(.bold))
+                        Text("Optional · Improves your matches")
+                            .font(.caption)
+                            .foregroundStyle(Theme.text.opacity(0.5))
+                    }
+                    .foregroundStyle(Theme.text)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Theme.text.opacity(0.3))
+                }
+                .padding()
+            }
+            
+            Divider().background(Theme.text.opacity(0.1)).padding(.leading, 44)
+            
             settingRow(icon: "bell.badge", title: "Notifications")
             Divider().background(Theme.text.opacity(0.1)).padding(.leading, 44)
             Toggle(isOn: $isDiscoverable) {
@@ -233,8 +370,48 @@ struct ProfileView: View {
             .padding()
             Divider().background(Theme.text.opacity(0.1)).padding(.leading, 44)
             settingRow(icon: "info.circle", title: "About Stigma")
+            
             Divider().background(Theme.text.opacity(0.1)).padding(.leading, 44)
-            settingRow(icon: "rectangle.portrait.and.arrow.right", title: "Sign out", isDestructive: true)
+            
+            // Sign Out
+            Button {
+                showSignOutAlert = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 24)
+                    Text("Sign Out")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Theme.text.opacity(0.3))
+                }
+                .foregroundStyle(.orange)
+                .padding()
+            }
+            
+            Divider().background(Theme.text.opacity(0.1)).padding(.leading, 44)
+            
+            // Delete Account
+            Button {
+                showDeleteAlert = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "trash.fill")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 24)
+                    Text("Delete Account")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Theme.text.opacity(0.3))
+                }
+                .foregroundStyle(.red)
+                .padding()
+            }
         }
         .background(Theme.glassBackground)
     }
