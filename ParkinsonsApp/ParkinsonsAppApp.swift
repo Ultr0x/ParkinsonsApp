@@ -10,13 +10,21 @@ import SwiftUI
 @main
 struct ParkinsonsAppApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    
+    @State private var splashFinished = false
+
     var body: some Scene {
         WindowGroup {
-            if hasCompletedOnboarding {
-                ContentView()
-            } else {
-                OnboardingView()
+            ZStack {
+                if hasCompletedOnboarding {
+                    ContentView()
+                } else {
+                    OnboardingView()
+                }
+
+                if !splashFinished {
+                    SplashScreen(isFinished: $splashFinished)
+                        .zIndex(999)
+                }
             }
         }
     }

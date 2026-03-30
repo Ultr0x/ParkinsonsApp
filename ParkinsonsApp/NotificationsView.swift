@@ -1,52 +1,73 @@
 import SwiftUI
 
-struct NotificationItem: Identifiable {
-    let id = UUID()
-    let icon: String
-    let title: String
-    let message: String
-    let date: Date
-    let tint: Color
-}
-
-let sampleNotifications: [NotificationItem] = [
-    NotificationItem(icon: "bell.fill", title: "Reminder", message: "Don't forget your meeting at 3 PM.", date: Date().addingTimeInterval(-300), tint: .blue),
-    NotificationItem(icon: "envelope.fill", title: "New Message", message: "You have received a new message.", date: Date().addingTimeInterval(-6000), tint: .green),
-    NotificationItem(icon: "star.fill", title: "Achievement", message: "You reached a new milestone!", date: Date().addingTimeInterval(-86400), tint: .yellow),
-    NotificationItem(icon: "exclamationmark.triangle.fill", title: "Warning", message: "Your subscription is about to expire.", date: Date().addingTimeInterval(-172800), tint: .red)
-]
-
 struct NotificationsView: View {
+    @State private var expandedID: UUID? = nil
+    @State private var appeared: Set<UUID> = []
+    
     var body: some View {
-        List {
-            ForEach(sampleNotifications) { item in
-                HStack(alignment: .top, spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(item.tint.opacity(0.15))
-                            .frame(width: 36, height: 36)
-                        Image(systemName: item.icon)
-                            .foregroundStyle(item.tint)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(item.title)
-                                .font(.subheadline.weight(.semibold))
-                            Spacer()
-                            Text(item.date, style: .relative)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Text(item.message)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(Array(sampleNotifications.enumerated()), id: \.element.id) { index, item in
+                    notificationCard(item: item, index: index)
                 }
-                .padding(.vertical, 4)
             }
+            .padding(16)
         }
+        .background(Theme.background)
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
+        .preferredColorScheme(.light)
+    }
+    
+    @ViewBuilder
+    private func notificationCard(item: NotificationItem, index: Int) -> some View {
+        let isExpanded = expandedID == item.id
+        
+        StigmaCard {
+            HStack(alignment: .top, spacing: 12) {
+                iconBadge(icon: item.icon, tint: item.tint)
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(item.title)
+                            .subheadlineStyle(size: 15)
+                            .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
+                            .foregroundStyle(Theme.text)
+                        Spacer()
+                        Text(item.date, style: .relative)
+                            .captionStyle()
+                            .foregroundStyle(Theme.text.opacity(0.6))
+                    }
+                    
+                    Text(item.message)
+                        .captionStyle()
+                        .foregroundStyle(Theme.text.opacity(isExpanded ? 0.85 : 0.6))
+                        .lineLimit(isExpanded ? nil : 1)
+                }
+            }
+        }
+        .onTapGesture {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                expandedID = isExpanded ? nil : item.id
+            }
+        }
+        .opacity(appeared.contains(item.id) ? 1 : 0)
+        .offset(y: appeared.contains(item.id) ? 0 : 8)
+        .onAppear {
+            withAnimation(.easeOut.delay(Double(index) * 0.06)) {
+                _ = appeared.insert(item.id)
+            }
+        }
+    }
+    
+    private func iconBadge(icon: String, tint: Color) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(tint.opacity(0.15))
+                .frame(width: 36, height: 36)
+            Image(systemName: icon)
+                .foregroundStyle(tint)
+        }
     }
 }
 

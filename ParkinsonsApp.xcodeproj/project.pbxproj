@@ -29,6 +29,23 @@
 		29DA150B2F76B88F0012D86D /* ParkinsonsAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParkinsonsAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2903D7582F7AFCC700E2E65E /* Exceptions for "ParkinsonsAppUITests" folder in "ParkinsonsApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ICONCOMPOSERFINAL.icon,
+			);
+			target = 29DA14F32F76B88E0012D86D /* ParkinsonsApp */;
+		};
+		2903D7592F7AFCC700E2E65E /* Exceptions for "ParkinsonsAppUITests" folder in "ParkinsonsAppUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ICONCOMPOSERFINAL.icon,
+			);
+			target = 29DA150A2F76B88F0012D86D /* ParkinsonsAppUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		29DA14F62F76B88E0012D86D /* ParkinsonsApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -42,6 +59,10 @@
 		};
 		29DA150E2F76B88F0012D86D /* ParkinsonsAppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2903D7582F7AFCC700E2E65E /* Exceptions for "ParkinsonsAppUITests" folder in "ParkinsonsApp" target */,
+				2903D7592F7AFCC700E2E65E /* Exceptions for "ParkinsonsAppUITests" folder in "ParkinsonsAppUITests" target */,
+			);
 			path = ParkinsonsAppUITests;
 			sourceTree = "<group>";
 		};
@@ -400,6 +421,12 @@
 				DEVELOPMENT_TEAM = KX47HMZ46N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIAppFonts = (
+						"AtkinsonHyperlegible-Regular.ttf",
+						"AtkinsonHyperlegible-Bold.ttf",
+						"AtkinsonHyperlegible-Italic.ttf",
+						"AtkinsonHyperlegible-BoldItalic.ttf",
+					);
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -432,6 +459,12 @@
 				DEVELOPMENT_TEAM = KX47HMZ46N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIAppFonts = (
+						"AtkinsonHyperlegible-Regular.ttf",
+						"AtkinsonHyperlegible-Bold.ttf",
+						"AtkinsonHyperlegible-Italic.ttf",
+						"AtkinsonHyperlegible-BoldItalic.ttf",
+					);
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

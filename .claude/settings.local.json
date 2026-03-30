@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(xcodebuild -scheme ParkinsonsApp -destination 'platform=iOS Simulator,name=iPhone 16' build)",
-      "Bash(xcodebuild -scheme ParkinsonsApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build)"
+      "Bash(xcodebuild -scheme ParkinsonsApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build)",
+      "Read(//Users/janswidzinski/Documents/parkisnosnsapps/ParkinsonsApp/**)",
+      "Bash(swift /tmp/render_svg.swift \"/Users/janswidzinski/Documents/parkisnosnsapps/ParkinsonsApp/finallogo.svg\" \"/Users/janswidzinski/Documents/parkisnosnsapps/ParkinsonsApp/ParkinsonsApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png\" 1024)",
+      "Bash(swift:*)",
+      "Bash(sips -g all /Users/janswidzinski/Documents/parkisnosnsapps/ParkinsonsApp/ParkinsonsApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png)",
+      "Bash(sips:*)",
+      "Bash(xcodebuild -version)",
+      "Bash(cp:*)",
+      "Bash(xcodebuild -project ParkinsonsApp.xcodeproj -scheme ParkinsonsApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build)",
+      "Bash(xcodebuild -project ParkinsonsApp.xcodeproj -scheme ParkinsonsApp -showBuildSettings)",
+      "Bash(fc-scan --format \"%{postscriptname}\\\\n\" /Users/janswidzinski/Documents/parkisnosnsapps/ParkinsonsApp/ParkinsonsApp/Fonts/AtkinsonHyperlegible-Regular.ttf)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

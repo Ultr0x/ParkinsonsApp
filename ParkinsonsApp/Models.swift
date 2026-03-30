@@ -11,9 +11,17 @@ import SwiftUI
 // MARK: - Enums
 
 enum Stage: String, CaseIterable {
-    case early = "Early stage"
-    case mid = "Mid stage"
-    case advanced = "Advanced stage"
+    case early = "Recently diagnosed"
+    case mid = "Living with it"
+    case advanced = "Long-term"
+
+    var icon: String {
+        switch self {
+        case .early: return "sunrise.fill"
+        case .mid: return "sun.max.fill"
+        case .advanced: return "moon.stars.fill"
+        }
+    }
 }
 
 // MARK: - Onboarding Enums
@@ -109,6 +117,65 @@ enum SymptomSide: String, Codable, CaseIterable {
         case .right: return "arrow.right"
         case .both: return "arrow.left.arrow.right"
         case .notApplicable: return "minus"
+        }
+    }
+}
+// MARK: - Interests
+
+enum Interest: String, Codable, CaseIterable {
+    case exercise = "Exercise"
+    case walking = "Walking"
+    case running = "Running"
+    case cycling = "Cycling"
+    case yoga = "Yoga"
+    case boxing = "Boxing"
+    case football = "Football"
+    case swimming = "Swimming"
+    case strengthTraining = "Strength Training"
+    case gardening = "Gardening"
+    case cooking = "Cooking"
+    case baking = "Baking"
+    case art = "Art"
+    case painting = "Painting"
+    case photography = "Photography"
+    case music = "Music"
+    case reading = "Reading"
+    case puzzles = "Puzzles"
+    case technology = "Technology"
+    case travel = "Travel"
+    case volunteering = "Volunteering"
+    case socialising = "Socialising"
+    case coffee = "Coffee"
+    case dogs = "Dogs"
+    case nature = "Nature"
+    
+    var icon: String {
+        switch self {
+        case .exercise: return "figure.run"
+        case .walking: return "figure.walk"
+        case .running: return "figure.run"
+        case .cycling: return "bicycle"
+        case .yoga: return "figure.mind.and.body"
+        case .boxing: return "figure.boxing"
+        case .football: return "soccerball"
+        case .swimming: return "figure.pool.swim"
+        case .strengthTraining: return "dumbbell.fill"
+        case .gardening: return "leaf.fill"
+        case .cooking: return "frying.pan.fill"
+        case .baking: return "birthday.cake.fill"
+        case .art: return "paintpalette.fill"
+        case .painting: return "paintbrush.fill"
+        case .photography: return "camera.fill"
+        case .music: return "music.note"
+        case .reading: return "book.fill"
+        case .puzzles: return "puzzlepiece.fill"
+        case .technology: return "desktopcomputer"
+        case .travel: return "airplane"
+        case .volunteering: return "hand.raised.fill"
+        case .socialising: return "person.2.fill"
+        case .coffee: return "cup.and.saucer.fill"
+        case .dogs: return "dog.fill"
+        case .nature: return "tree.fill"
         }
     }
 }
@@ -240,9 +307,9 @@ struct CommunityPlace: Identifiable {
     var memberIDs: [UUID]     // folk who are members/regulars
     var activityIDs: [UUID]   // activities at this place
 
-    // Parkinson's Friendly Spaces programme
+    // Tulip-certified Friendly Spaces programme
     // Explicit certification flag (venues that display sticker/beacon and completed staff awareness training)
-    var parkinsonsFriendly: Bool = false
+    var tulipCertified: Bool = false
 
     // Optional, for richer UI — not strictly required to compute friendliness
     var displaysBeacon: Bool = false
@@ -250,13 +317,16 @@ struct CommunityPlace: Identifiable {
     var seatingAvailable: Bool = false
     var calmEnvironment: Bool = false
 
+    // Community verification (users confirmed it works well, accessibility info checked)
+    var communityVerified: Bool = false
+
     // Derived flags
     /// A place hosts events if it has any activities associated with it
     var hostsEvents: Bool { !activityIDs.isEmpty }
 
-    /// Programme rule: Hosting events implies Parkinson’s Friendly certification
+    /// Programme rule: Hosting events implies Tulip certification
     /// Friendly status is true if explicitly certified OR if the place hosts events
-    var isParkinsonsFriendly: Bool { parkinsonsFriendly || hostsEvents }
+    var isTulipCertified: Bool { tulipCertified || hostsEvents }
 }
 
 // MARK: - Community Folk (mock people)
@@ -269,9 +339,10 @@ struct CommunityFolk: Identifiable {
     let diagnosisYear: Int
     let stage: Stage
     let bio: String
-    let interests: [String]
+    let interests: [Interest]
     let avatarColor: Color
     var placeIDs: [UUID]      // places they attend
+    var isDiscoverable: Bool = false
     
     // Onboarding data
     var journeyStage: JourneyStage = .livingWithIt
@@ -301,6 +372,21 @@ struct PlaceActivity: Identifiable {
     let time: String
     let placeID: UUID
     var participantIDs: [UUID]  // folk attending
+    var photos: [EventPhoto] = []
+    var stageFilter: Stage? = nil
+}
+
+struct EventPhoto: Identifiable {
+    let id = UUID()
+    let iconName: String
+    let gradientColors: [Color]
+    let caption: String?
+
+    init(icon: String, colors: [Color], caption: String? = nil) {
+        self.iconName = icon
+        self.gradientColors = colors
+        self.caption = caption
+    }
 }
 
 // MARK: - Legacy models (kept for existing screens)
@@ -309,7 +395,7 @@ struct UserProfile {
     var name: String
     var diagnosisYear: Int?
     var approximateStage: Stage
-    var interests: [String]
+    var interests: [Interest]
     var companionName: String?
     var milestones: [Milestone]
     var isDiscoverable: Bool
@@ -363,4 +449,15 @@ struct TulipEvent: Identifiable {
     var description: String
     var attendeeCount: Int
     var stageFilter: Stage?
+}
+
+// MARK: - Notification
+
+struct NotificationItem: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+    let icon: String
+    let tint: Color
+    let date: Date
 }

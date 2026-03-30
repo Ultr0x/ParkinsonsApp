@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PlaceDetailView: View {
     let place: CommunityPlace
+    var fromDiscovery: Bool = false
 
     private var members: [CommunityFolk] {
         place.memberIDs.compactMap { folkFor(id: $0) }
@@ -19,15 +20,40 @@ struct PlaceDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                heroImage
-                content
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    heroImage
+                    content
+                    
+                    if fromDiscovery {
+                        // Extra bottom padding for the floating button
+                        Spacer().frame(height: 100)
+                    }
+                }
+            }
+            
+            if fromDiscovery {
+                checkInButton
             }
         }
         .background(Theme.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                HStack(spacing: 6) {
+                    if place.hostsEvents {
+                        Image(systemName: "star.fill")
+                            .labelStyle()
+                            .foregroundStyle(Theme.accent)
+                        Text("Community Hub")
+                            .titleStyle(size: 16)
+                            .foregroundStyle(Theme.text)
+                    }
+                }
+            }
+        }
         .preferredColorScheme(.light)
     }
 
@@ -35,25 +61,39 @@ struct PlaceDetailView: View {
 
     private var heroImage: some View {
         ZStack(alignment: .bottomLeading) {
-            Rectangle()
-                .fill(place.category.color.opacity(0.15))
-                .frame(height: 200)
-                .overlay(
-                    Image(systemName: place.category.icon)
-                        .font(.system(size: 60, weight: .light))
-                        .foregroundStyle(place.category.color.opacity(0.3))
-                )
+            // Extend the color behind the navigation bar (eliminates top gap)
+            VStack(spacing: 0) {
+                place.category.color.opacity(0.15)
+                    .frame(height: 60)
+                    .ignoresSafeArea(edges: .top)
+                
+                Rectangle()
+                    .fill(place.category.color.opacity(0.15))
+                    .frame(height: 200)
+                    .overlay(
+                        Image(systemName: place.category.icon)
+                            .stigmaFont(size: 60, name: "AtkinsonHyperlegible-Regular")
+                            .foregroundStyle(place.category.color.opacity(0.3))
+                    )
+            }
 
             VStack(alignment: .leading, spacing: 4) {
-                PillBadge(text: place.category.rawValue, tint: place.category.color, systemImage: place.category.icon)
-
-                if place.isParkinsonsFriendly {
-                    PillBadge(text: "Parkinson’s Friendly", tint: Theme.accent, systemImage: "checkmark.seal.fill")
+                HStack(spacing: 6) {
+                    PillBadge(text: place.category.rawValue, tint: place.category.color, systemImage: place.category.icon)
+                }
+                
+                HStack(spacing: 6) {
+                    if place.isTulipCertified {
+                        PillBadge(text: "Tulip Certified", tint: Theme.green, systemImage: "checkmark.seal.fill")
+                    }
+                    
+                    if place.communityVerified {
+                        PillBadge(text: "Verified", tint: Theme.green, systemImage: "checkmark.circle.fill")
+                    }
                 }
 
                 Text(place.name)
-                    .font(.title2.weight(.heavy))
-                    .fontDesign(.rounded)
+                    .logoStyle(size: 32)
                     .foregroundStyle(Theme.text)
             }
             .padding(16)
@@ -69,6 +109,9 @@ struct PlaceDetailView: View {
 
             // Description
             descriptionSection
+
+            // Photo gallery
+            placePhotoGallery
 
             friendlySection
 
@@ -89,14 +132,14 @@ struct PlaceDetailView: View {
     }
 
     private var quickInfoRow: some View {
-        HStack(spacing: 12) {
+        FlowLayout(spacing: 8) {
             if let cost = place.cost {
                 PillBadge(text: cost, tint: Theme.green, systemImage: "sterlingsign.circle")
             }
             PillBadge(text: "\(members.count) members", tint: Theme.cyan, systemImage: "person.2")
             PillBadge(text: "\(activities.count) activities", tint: Theme.orange, systemImage: "calendar")
 
-            if place.isParkinsonsFriendly {
+            if place.isTulipCertified {
                 PillBadge(text: "Friendly", tint: Theme.accent, systemImage: "handshake")
             }
         }
@@ -105,10 +148,10 @@ struct PlaceDetailView: View {
     private var descriptionSection: some View {
         StigmaCard {
             Text("About")
-                .font(.headline.weight(.heavy))
+                .headlineStyle(size: 18)
                 .foregroundStyle(Theme.text)
             Text(place.description)
-                .font(.subheadline)
+                .subheadlineStyle()
                 .foregroundStyle(Theme.text.opacity(0.85))
                 .lineSpacing(4)
         }
@@ -116,19 +159,19 @@ struct PlaceDetailView: View {
 
     private var friendlySection: some View {
         Group {
-            if place.isParkinsonsFriendly {
+            if place.isTulipCertified {
                 StigmaCard {
                     HStack(spacing: 12) {
                         Image(systemName: "checkmark.seal.fill")
-                            .font(.title3)
+                            .titleStyle(size: 20)
                             .foregroundStyle(Theme.accent)
                             .frame(width: 28)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Parkinson’s Friendly")
-                                .font(.headline.weight(.heavy))
+                            Text("Tulip Certified")
+                                .headlineStyle(size: 18)
                                 .foregroundStyle(Theme.text)
-                            Text("This place understands Parkinson’s.")
-                                .font(.footnote)
+                            Text("Staff here are trained to be patient and understanding.")
+                                .footnoteStyle()
                                 .foregroundStyle(Theme.text.opacity(0.7))
                         }
                     }
@@ -137,33 +180,33 @@ struct PlaceDetailView: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("They commit to:")
-                            .font(.caption.weight(.bold))
+                            .labelStyle()
                             .foregroundStyle(Theme.text.opacity(0.6))
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 8) {
                                 Image(systemName: place.staffAwarenessTraining ? "checkmark.circle.fill" : "circle")
                                     .foregroundStyle(place.staffAwarenessTraining ? Theme.green : Theme.text.opacity(0.4))
                                 Text("Staff awareness training")
-                                    .font(.subheadline.weight(.medium))
+                                    .subheadlineStyle()
                             }
                             HStack(spacing: 8) {
                                 Image(systemName: place.seatingAvailable ? "checkmark.circle.fill" : "circle")
                                     .foregroundStyle(place.seatingAvailable ? Theme.green : Theme.text.opacity(0.4))
                                 Text("Comfortable seating available")
-                                    .font(.subheadline.weight(.medium))
+                                    .subheadlineStyle()
                             }
                             HStack(spacing: 8) {
                                 Image(systemName: place.calmEnvironment ? "checkmark.circle.fill" : "circle")
                                     .foregroundStyle(place.calmEnvironment ? Theme.green : Theme.text.opacity(0.4))
                                 Text("Calm, patient environment")
-                                    .font(.subheadline.weight(.medium))
+                                    .subheadlineStyle()
                             }
                             if place.displaysBeacon {
                                 HStack(spacing: 8) {
                                     Image(systemName: "dot.radiowaves.left.and.right")
                                         .foregroundStyle(Theme.accent)
                                     Text("Beacon/sticker displayed on site")
-                                        .font(.subheadline.weight(.medium))
+                                        .subheadlineStyle()
                                 }
                             }
                         }
@@ -179,15 +222,16 @@ struct PlaceDetailView: View {
             // Schedule
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "clock.fill")
-                    .font(.title3)
+                    .titleStyle(size: 20)
                     .foregroundStyle(Theme.accent)
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Schedule")
-                        .font(.caption.weight(.bold))
+                        .labelStyle()
                         .foregroundStyle(Theme.text.opacity(0.6))
                     Text(place.schedule)
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text)
                 }
             }
@@ -197,18 +241,20 @@ struct PlaceDetailView: View {
             // Address
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "mappin.circle.fill")
-                    .font(.title3)
+                    .titleStyle(size: 20)
                     .foregroundStyle(Theme.accent)
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Location")
-                        .font(.caption.weight(.bold))
+                        .labelStyle()
                         .foregroundStyle(Theme.text.opacity(0.6))
                     Text(place.address)
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text)
                     Text(place.postcode)
-                        .font(.subheadline.weight(.bold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text)
                 }
             }
@@ -219,11 +265,12 @@ struct PlaceDetailView: View {
 
                 HStack(spacing: 12) {
                     Image(systemName: "link.circle.fill")
-                        .font(.title3)
+                        .titleStyle(size: 20)
                         .foregroundStyle(Theme.accent)
                         .frame(width: 28)
                     Link("Visit Website", destination: url)
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.accent)
                 }
             }
@@ -234,7 +281,7 @@ struct PlaceDetailView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Accessibility")
-                        .font(.caption.weight(.bold))
+                        .labelStyle()
                         .foregroundStyle(Theme.text.opacity(0.6))
 
                     FlowLayout(spacing: 6) {
@@ -251,7 +298,7 @@ struct PlaceDetailView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Highlights")
-                        .font(.caption.weight(.bold))
+                        .labelStyle()
                         .foregroundStyle(Theme.text.opacity(0.6))
 
                     FlowLayout(spacing: 6) {
@@ -269,7 +316,7 @@ struct PlaceDetailView: View {
     private var membersSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Members & Regulars")
-                .font(.headline.weight(.heavy))
+                .headlineStyle(size: 18)
                 .foregroundStyle(Theme.text)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -282,21 +329,27 @@ struct PlaceDetailView: View {
                                         .fill(folk.avatarColor.opacity(0.2))
                                         .frame(width: 56, height: 56)
                                     Text(folk.initials)
-                                        .font(.headline.weight(.bold))
+                                        .headlineStyle()
                                         .foregroundStyle(folk.avatarColor)
+                                        .accessibilityHidden(true)
                                 }
 
                                 Text(folk.firstName)
-                                    .font(.caption.weight(.bold))
+                                    .labelStyle()
                                     .foregroundStyle(Theme.text)
 
+                                // Fix: min size 14pt, was size 9
                                 Text(folk.stage.rawValue)
-                                    .font(.system(size: 9).weight(.semibold))
+                                    .caption2Style()
+                                    .stigmaFont(size: 11, name: "AtkinsonHyperlegible-Bold")
                                     .foregroundStyle(Theme.text.opacity(0.6))
                             }
                             .frame(width: 72)
+                            .frame(minHeight: A11ySize.minTouchTarget)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("\(folk.firstName) \(folk.lastName), \(folk.stage.rawValue)")
+                        .accessibilityHint("Opens \(folk.firstName)'s profile")
                     }
                 }
             }
@@ -308,7 +361,7 @@ struct PlaceDetailView: View {
     private var activitiesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Activities")
-                .font(.headline.weight(.heavy))
+                .headlineStyle(size: 18)
                 .foregroundStyle(Theme.text)
 
             ForEach(activities) { activity in
@@ -316,6 +369,8 @@ struct PlaceDetailView: View {
                     activityRow(activity)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(activity.name), \(activity.time)\(activity.recurrence.map { ", \($0)" } ?? ""), \(activity.participantIDs.count) participants")
+                .accessibilityHint("Opens full activity details")
             }
         }
     }
@@ -324,24 +379,25 @@ struct PlaceDetailView: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(spacing: 2) {
                 Text(activity.date.formatted(.dateTime.day()))
-                    .font(.title2.weight(.heavy))
+                    .titleStyle(size: 22)
                     .foregroundStyle(place.category.color)
                 Text(activity.date.formatted(.dateTime.month(.abbreviated)))
-                    .font(.caption.weight(.bold))
+                    .labelStyle()
                     .foregroundStyle(Theme.text.opacity(0.6))
             }
             .frame(width: 44)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(activity.name)
-                    .font(.subheadline.weight(.bold))
+                    .subheadlineStyle(size: 15)
+                    .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(Theme.text)
                 Text(activity.time)
-                    .font(.caption.weight(.semibold))
+                    .labelStyle()
                     .foregroundStyle(Theme.text.opacity(0.7))
                 if let recurrence = activity.recurrence {
                     Text(recurrence)
-                        .font(.caption2.weight(.medium))
+                        .caption2Style()
                         .foregroundStyle(place.category.color)
                 }
 
@@ -353,7 +409,7 @@ struct PlaceDetailView: View {
                             .frame(width: 22, height: 22)
                             .overlay(
                                 Text(folk.initials)
-                                    .font(.system(size: 8).weight(.bold))
+                                    .stigmaFont(size: 8, name: "AtkinsonHyperlegible-Bold")
                                     .foregroundStyle(folk.avatarColor)
                             )
                             .overlay(Circle().stroke(Theme.cardBackground, lineWidth: 1.5))
@@ -364,7 +420,7 @@ struct PlaceDetailView: View {
                             .frame(width: 22, height: 22)
                             .overlay(
                                 Text("+\(activity.participantIDs.count - 5)")
-                                    .font(.system(size: 8).weight(.bold))
+                                    .stigmaFont(size: 8, name: "AtkinsonHyperlegible-Bold")
                                     .foregroundStyle(Theme.text.opacity(0.6))
                             )
                     }
@@ -375,12 +431,96 @@ struct PlaceDetailView: View {
             Spacer()
 
             Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
+                .footnoteStyle(size: 13)
+                .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                 .foregroundStyle(Theme.text.opacity(0.3))
                 .padding(.top, 4)
         }
         .padding(14)
         .background(Theme.glassBackground)
+    }
+
+    // MARK: - Photo Gallery
+
+    private var placePhotoGallery: some View {
+        let categoryColor = place.category.color
+        // Generate placeholder photos from the place's activities and category
+        let photos: [(icon: String, colors: [Color], caption: String)] = {
+            var result: [(String, [Color], String)] = [
+                (place.category.icon, [categoryColor, categoryColor.opacity(0.6)], place.category.rawValue),
+            ]
+            // Add activity-based photos
+            for act in activities.prefix(3) {
+                if let firstPhoto = act.photos.first {
+                    result.append((firstPhoto.iconName, firstPhoto.gradientColors, firstPhoto.caption ?? act.name))
+                }
+            }
+            // Add accessibility-themed photos
+            if place.seatingAvailable {
+                result.append(("chair.fill", [Color(hex: 0x81C784), Color(hex: 0x2E7D32)], "Comfortable seating"))
+            }
+            if place.calmEnvironment {
+                result.append(("leaf.fill", [Color(hex: 0xA5D6A7), Color(hex: 0x43A047)], "Calm environment"))
+            }
+            return result
+        }()
+
+        return VStack(alignment: .leading, spacing: 10) {
+            Text("Photos")
+                .headlineStyle(size: 18)
+                .foregroundStyle(Theme.text)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(Array(photos.enumerated()), id: \.offset) { _, photo in
+                        ZStack {
+                            LinearGradient(
+                                colors: photo.colors,
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            VStack(spacing: 6) {
+                                Image(systemName: photo.icon)
+                                    .stigmaFont(size: 28, name: "AtkinsonHyperlegible-Regular")
+                                    .foregroundStyle(.white.opacity(0.9))
+                                Text(photo.caption)
+                                    .stigmaFont(size: 11, name: "AtkinsonHyperlegible-Bold")
+                                    .foregroundStyle(.white.opacity(0.8))
+                                    .lineLimit(1)
+                            }
+                        }
+                        .frame(width: 160, height: 110)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Discovery Overlay
+
+    private var checkInButton: some View {
+        Button {
+            HapticManager.shared.success()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .headlineStyle(size: 18)
+                Text("Check In at \(place.name)")
+                    .headlineStyle(size: 18)
+            }
+            .foregroundStyle(.white)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(place.category.color)
+                    .shadow(color: place.category.color.opacity(0.4), radius: 12, y: 6)
+            )
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 
@@ -412,11 +552,14 @@ struct FlowLayout: Layout {
 
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > maxWidth, x > 0 {
+            
+            // If the subview is wider than current row, and we aren't at the start of a row, move to next row
+            if x + size.width > maxWidth && x > 0 {
                 x = 0
                 y += rowHeight + spacing
                 rowHeight = 0
             }
+            
             positions.append(CGPoint(x: x, y: y))
             rowHeight = max(rowHeight, size.height)
             x += size.width + spacing

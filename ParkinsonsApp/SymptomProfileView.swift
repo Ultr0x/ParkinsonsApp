@@ -47,9 +47,10 @@ struct SymptomProfileView: View {
                     Spacer()
                     HStack(spacing: 10) {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.title3)
+                            .titleStyle(size: 20)
                         Text("Saved!")
-                            .font(.subheadline.weight(.bold))
+                            .subheadlineStyle(size: 15)
+                            .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24)
@@ -75,11 +76,12 @@ struct SymptomProfileView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Your detailed symptom profile")
-                .font(.title3.weight(.bold))
+                .titleStyle(size: 20)
+                .stigmaFont(size: 20, name: "AtkinsonHyperlegible-Bold")
                 .foregroundStyle(Theme.text)
             
             Text("This optional tool helps us match you with the right spaces, activities, and people in the community. You don't have to fill it in — but the more you share, the better your experience.")
-                .font(.subheadline.weight(.medium))
+                .subheadlineStyle()
                 .foregroundStyle(Theme.text.opacity(0.65))
                 .lineSpacing(3)
         }
@@ -95,16 +97,17 @@ struct SymptomProfileView: View {
                         .fill(Theme.accent.opacity(0.15))
                         .frame(width: 44, height: 44)
                     Image(systemName: "sparkles")
-                        .font(.title3.weight(.semibold))
+                        .titleStyle(size: 20)
+                        .stigmaFont(size: 20, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.accent)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Unlock better matches")
-                        .font(.subheadline.weight(.heavy))
+                        .titleStyle(size: 17)
                         .foregroundStyle(Theme.text)
                     Text("More detail = better venue, activity & people recommendations.")
-                        .font(.caption)
+                        .captionStyle()
                         .foregroundStyle(Theme.text.opacity(0.6))
                 }
             }
@@ -126,16 +129,17 @@ struct SymptomProfileView: View {
                         .frame(width: 44, height: 44)
                         .rotationEffect(.degrees(-90))
                     Text("\(enabledCount)")
-                        .font(.caption.weight(.black))
+                        .stigmaFont(size: 12, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(enabledCount) of 19 symptoms selected")
-                        .font(.subheadline.weight(.bold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text)
                     Text("Toggle each one that applies to you")
-                        .font(.caption)
+                        .captionStyle()
                         .foregroundStyle(Theme.text.opacity(0.5))
                 }
                 
@@ -163,18 +167,19 @@ struct SymptomProfileView: View {
                             .fill(Theme.accent.opacity(0.15))
                             .frame(width: 40, height: 40)
                         Image(systemName: category.icon)
-                            .font(.body.weight(.semibold))
+                            .bodyStyle()
+                            .stigmaFont(size: 17, name: "AtkinsonHyperlegible-Bold")
                             .foregroundStyle(Theme.accent)
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(category.title)
-                            .font(.headline.weight(.heavy))
+                            .headlineStyle()
                             .foregroundStyle(Theme.text)
                         
                         let catEnabledCount = category.items.filter(\.isEnabled).count
                         Text("\(catEnabledCount) of \(category.items.count) selected")
-                            .font(.caption)
+                            .captionStyle()
                             .foregroundStyle(Theme.text.opacity(0.45))
                     }
                     
@@ -183,7 +188,7 @@ struct SymptomProfileView: View {
                     let catEnabledCount = category.items.filter(\.isEnabled).count
                     if catEnabledCount > 0 {
                         Text("\(catEnabledCount)")
-                            .font(.caption.weight(.bold))
+                            .labelStyle()
                             .foregroundStyle(.white)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -192,7 +197,8 @@ struct SymptomProfileView: View {
                     }
                     
                     Image(systemName: expandedCategories.contains(category.title) ? "chevron.up" : "chevron.down")
-                        .font(.footnote.weight(.semibold))
+                        .footnoteStyle(size: 13)
+                        .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text.opacity(0.4))
                 }
             }
@@ -226,11 +232,12 @@ struct SymptomProfileView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(item.label)
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text)
                     
                     Text(item.friendlyDescription)
-                        .font(.caption)
+                        .captionStyle()
                         .foregroundStyle(Theme.text.opacity(0.5))
                 }
                 
@@ -256,7 +263,8 @@ struct SymptomProfileView: View {
                     // Severity row
                     VStack(alignment: .leading, spacing: 6) {
                         Text("How much does it affect you?")
-                            .font(.caption2.weight(.bold))
+                            .caption2Style()
+                            .stigmaFont(size: 11, name: "AtkinsonHyperlegible-Bold")
                             .foregroundStyle(Theme.text.opacity(0.4))
                         
                         HStack(spacing: 6) {
@@ -268,7 +276,7 @@ struct SymptomProfileView: View {
                                     }
                                 } label: {
                                     Text(severity.rawValue)
-                                        .font(.caption.weight(.bold))
+                                        .labelStyle()
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 7)
                                         .background(
@@ -285,34 +293,18 @@ struct SymptomProfileView: View {
                     // Side selector row
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Which side?")
-                            .font(.caption2.weight(.bold))
+                            .caption2Style()
+                            .stigmaFont(size: 11, name: "AtkinsonHyperlegible-Bold")
                             .foregroundStyle(Theme.text.opacity(0.4))
                         
+                        // Top row: Left / Right / Both
                         HStack(spacing: 6) {
-                            ForEach(SymptomSide.allCases, id: \.self) { side in
-                                let isSelected = item.side == side
-                                Button {
-                                    withAnimation(.easeInOut(duration: 0.15)) {
-                                        profile.categories[categoryIndex].items[itemIndex].side = isSelected ? nil : side
-                                    }
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: side.icon)
-                                            .font(.system(size: 9).weight(.bold))
-                                        Text(side.rawValue)
-                                            .font(.caption.weight(.bold))
-                                    }
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 7)
-                                    .background(
-                                        Capsule()
-                                            .fill(isSelected ? Theme.accent : Theme.text.opacity(0.06))
-                                    )
-                                    .foregroundStyle(isSelected ? .white : Theme.text.opacity(0.6))
-                                }
-                                .buttonStyle(.plain)
+                            ForEach([SymptomSide.left, .right, .both], id: \.self) { side in
+                                sideButton(side: side, categoryIndex: categoryIndex, itemIndex: itemIndex, currentSide: item.side)
                             }
                         }
+                        // Bottom row: N/A
+                        sideButton(side: .notApplicable, categoryIndex: categoryIndex, itemIndex: itemIndex, currentSide: item.side)
                     }
                 }
                 .padding(.leading, 4)
@@ -331,6 +323,39 @@ struct SymptomProfileView: View {
         }
     }
     
+    private func sideButton(side: SymptomSide, categoryIndex: Int, itemIndex: Int, currentSide: SymptomSide?) -> some View {
+        let isSelected = currentSide == side
+        let label: String = {
+            switch side {
+            case .left: return "Left"
+            case .right: return "Right"
+            case .both: return "Both"
+            case .notApplicable: return "N/A"
+            }
+        }()
+        
+        return Button {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                profile.categories[categoryIndex].items[itemIndex].side = isSelected ? nil : side
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: side.icon)
+                    .stigmaFont(size: 9, name: "AtkinsonHyperlegible-Bold")
+                Text(label)
+                    .labelStyle()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 7)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Theme.accent : Theme.text.opacity(0.06))
+            )
+            .foregroundStyle(isSelected ? .white : Theme.text.opacity(0.6))
+        }
+        .buttonStyle(.plain)
+    }
+    
     // MARK: - Other Notes
     
     private var otherNotesSection: some View {
@@ -341,21 +366,22 @@ struct SymptomProfileView: View {
                         .fill(Theme.accent.opacity(0.15))
                         .frame(width: 40, height: 40)
                     Image(systemName: "text.bubble.fill")
-                        .font(.body.weight(.semibold))
+                        .bodyStyle()
+                        .stigmaFont(size: 17, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.accent)
                 }
                 
                 Text("Anything else?")
-                    .font(.headline.weight(.heavy))
+                    .headlineStyle()
                     .foregroundStyle(Theme.text)
             }
             
             Text("Anything we haven't listed that affects your day-to-day?")
-                .font(.caption)
+                .captionStyle()
                 .foregroundStyle(Theme.text.opacity(0.5))
             
             TextField("Type here...", text: $otherNotes, axis: .vertical)
-                .font(.subheadline)
+                .subheadlineStyle()
                 .lineLimit(3...6)
                 .padding(12)
                 .background(
@@ -373,7 +399,7 @@ struct SymptomProfileView: View {
             saveProfile()
         } label: {
             Text("Save My Profile")
-                .font(.headline.weight(.bold))
+                .headlineStyle()
                 .frame(maxWidth: .infinity)
                 .padding(16)
                 .background(Theme.accent)

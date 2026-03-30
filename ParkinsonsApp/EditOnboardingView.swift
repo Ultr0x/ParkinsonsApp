@@ -14,11 +14,13 @@ struct EditOnboardingView: View {
     @AppStorage("onboardingExperiences") private var experiencesRaw: String = ""
     @AppStorage("onboardingBodyDistribution") private var bodyDistributionRaw: String = ""
     @AppStorage("onboardingBestTime") private var bestTimeRaw: String = ""
+    @AppStorage("onboardingInterests") private var interestsRaw: String = ""
     
     @State private var selectedJourneyStage: JourneyStage? = nil
     @State private var selectedExperiences: Set<OutAndAboutExperience> = []
     @State private var selectedBodyDistribution: BodyDistribution? = nil
     @State private var selectedBestTime: BestTimeOfDay? = nil
+    @State private var selectedInterests: Set<Interest> = []
     
     var body: some View {
         NavigationStack {
@@ -51,7 +53,7 @@ struct EditOnboardingView: View {
                         sectionHeader(title: "When you're out and about, what do you notice most?", icon: "eye")
                         
                         Text("Select all that apply")
-                            .font(.caption.weight(.medium))
+                            .captionStyle()
                             .foregroundStyle(Theme.text.opacity(0.5))
                         
                         VStack(spacing: 10) {
@@ -110,6 +112,63 @@ struct EditOnboardingView: View {
                                 }
                             }
                         }
+                        Divider().background(Theme.text.opacity(0.1))
+                        
+                        // MARK: - Interests
+                        sectionHeader(title: "What are you into?", icon: "heart.fill")
+                        
+                        Text("Pick up to 5")
+                            .captionStyle()
+                            .foregroundStyle(Theme.text.opacity(0.5))
+                        
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                            ForEach(Interest.allCases, id: \.self) { interest in
+                                let isSelected = selectedInterests.contains(interest)
+                                let isDisabled = selectedInterests.count >= 5 && !isSelected
+                                
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        if isSelected {
+                                            selectedInterests.remove(interest)
+                                        } else if selectedInterests.count < 5 {
+                                            selectedInterests.insert(interest)
+                                        }
+                                    }
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: interest.icon)
+                                            .labelStyle()
+                                            .frame(width: 18)
+                                        Text(interest.rawValue)
+                                            .labelStyle()
+                                            .lineLimit(1)
+                                        Spacer()
+                                        if isSelected {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .caption2Style()
+                                                .foregroundStyle(Theme.accent)
+                                        }
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 9)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .fill(isSelected ? Theme.accent.opacity(0.12) : Theme.cardBackground)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .stroke(isSelected ? Theme.accent.opacity(0.4) : Color.clear, lineWidth: 1.5)
+                                    )
+                                    .foregroundStyle(isDisabled ? Theme.text.opacity(0.3) : Theme.text)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(isDisabled)
+                            }
+                        }
+                        
+                        Text("\(selectedInterests.count)/5 selected")
+                            .labelStyle()
+                            .foregroundStyle(Theme.accent)
                         
                         // Save button
                         Button {
@@ -117,7 +176,7 @@ struct EditOnboardingView: View {
                             dismiss()
                         } label: {
                             Text("Save Changes")
-                                .font(.headline.weight(.bold))
+                                .headlineStyle()
                                 .frame(maxWidth: .infinity)
                                 .padding(16)
                                 .background(Theme.accent)
@@ -149,10 +208,11 @@ struct EditOnboardingView: View {
     private func sectionHeader(title: String, icon: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.subheadline.weight(.semibold))
+                .subheadlineStyle(size: 15)
+                .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                 .foregroundStyle(Theme.accent)
             Text(title)
-                .font(.subheadline.weight(.heavy))
+                .titleStyle(size: 17)
                 .foregroundStyle(Theme.text)
         }
     }
@@ -165,19 +225,21 @@ struct EditOnboardingView: View {
                         .fill(isSelected ? Theme.accent.opacity(0.2) : Theme.text.opacity(0.06))
                         .frame(width: 40, height: 40)
                     Image(systemName: icon)
-                        .font(.footnote.weight(.semibold))
+                        .footnoteStyle(size: 13)
+                        .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(isSelected ? Theme.accent : Theme.text.opacity(0.5))
                 }
                 
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .subheadlineStyle(size: 15)
+                    .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.leading)
                 
                 Spacer()
                 
                 Image(systemName: isSelected ? (isMulti ? "checkmark.square.fill" : "checkmark.circle.fill") : (isMulti ? "square" : "circle"))
-                    .font(.title3)
+                    .titleStyle(size: 20)
                     .foregroundStyle(isSelected ? Theme.accent : Theme.text.opacity(0.2))
             }
             .padding(14)
@@ -206,6 +268,13 @@ struct EditOnboardingView: View {
                 OutAndAboutExperience.allCases.first { $0.rawValue == raw }
             })
         }
+        
+        if let data = interestsRaw.data(using: .utf8),
+           let rawValues = try? JSONDecoder().decode([String].self, from: data) {
+            selectedInterests = Set(rawValues.compactMap { raw in
+                Interest.allCases.first { $0.rawValue == raw }
+            })
+        }
     }
     
     private func save() {
@@ -213,10 +282,16 @@ struct EditOnboardingView: View {
         bodyDistributionRaw = selectedBodyDistribution?.rawValue ?? ""
         bestTimeRaw = selectedBestTime?.rawValue ?? ""
         
-        let rawValues = selectedExperiences.map { $0.rawValue }
-        if let data = try? JSONEncoder().encode(rawValues),
+        let expValues = selectedExperiences.map { $0.rawValue }
+        if let data = try? JSONEncoder().encode(expValues),
            let str = String(data: data, encoding: .utf8) {
             experiencesRaw = str
+        }
+        
+        let intValues = selectedInterests.map { $0.rawValue }
+        if let data = try? JSONEncoder().encode(intValues),
+           let str = String(data: data, encoding: .utf8) {
+            interestsRaw = str
         }
     }
 }

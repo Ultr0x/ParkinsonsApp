@@ -3,7 +3,7 @@ import SwiftUI
 struct MapPreviewView: View {
     var body: some View {
         List {
-            Section(header: Text("Tulip spaces nearby").font(.headline)) {
+            Section(header: Text("Tulip spaces nearby").headlineStyle()) {
                 ForEach(samplePlaces) { place in
                     NavigationLink(destination: PlaceDetailView(place: place)) {
                         HStack(spacing: 12) {
@@ -16,9 +16,10 @@ struct MapPreviewView: View {
                             }
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(place.name)
-                                    .font(.subheadline.weight(.semibold))
+                                    .subheadlineStyle(size: 15)
+                                    .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                                 Text(place.category.rawValue)
-                                    .font(.caption)
+                                    .captionStyle()
                                     .foregroundStyle(.secondary)
                             }
                         }

@@ -14,12 +14,14 @@ struct ProfileView: View {
     @AppStorage("onboardingExperiences") private var experiencesRaw: String = ""
     @AppStorage("onboardingBodyDistribution") private var bodyDistributionRaw: String = ""
     @AppStorage("onboardingBestTime") private var bestTimeRaw: String = ""
+    @AppStorage("onboardingInterests") private var interestsRaw: String = ""
     @AppStorage("detailedSymptomProfile") private var profileData: String = ""
     
     @State private var isDiscoverable = sampleUser.isDiscoverable
     @State private var showSignOutAlert = false
     @State private var showDeleteAlert = false
     @State private var showEditSheet = false
+    @State private var showSettings = false
     
     var body: some View {
         NavigationStack {
@@ -58,6 +60,22 @@ struct ProfileView: View {
             .sheet(isPresented: $showEditSheet) {
                 EditOnboardingView()
             }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .subheadlineStyle(size: 15)
+                            .foregroundStyle(Theme.text.opacity(0.6))
+                    }
+                    .accessibilityLabel("Settings")
+                    .accessibilityHint("Open accessibility and app settings")
+                }
+            }
         }
         .preferredColorScheme(.light)
     }
@@ -71,6 +89,7 @@ struct ProfileView: View {
         experiencesRaw = ""
         bodyDistributionRaw = ""
         bestTimeRaw = ""
+        interestsRaw = ""
         profileData = ""
         hasCompletedOnboarding = false
     }
@@ -85,22 +104,22 @@ struct ProfileView: View {
                     .frame(width: 80, height: 80)
                 
                 Text(userName.isEmpty ? "?" : String(userName.prefix(1)))
-                    .font(.system(size: 32, weight: .bold))
+                    .stigmaFont(size: 32, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(Theme.accent)
             }
             
             VStack(alignment: .leading, spacing: 6) {
                 Text(userName.isEmpty ? sampleUser.name : userName)
-                    .font(.title2.weight(.bold))
+                    .titleStyle(size: 22)
                     .foregroundStyle(Theme.text)
                 
                 if !journeyStageRaw.isEmpty {
                     Text(journeyStageRaw)
-                        .font(.subheadline.weight(.medium))
+                        .subheadlineStyle()
                         .foregroundStyle(Theme.text.opacity(0.8))
                 } else if let year = sampleUser.diagnosisYear {
                     Text("Diagnosed \(String(year)) · \(sampleUser.approximateStage.rawValue)")
-                        .font(.subheadline.weight(.medium))
+                        .subheadlineStyle()
                         .foregroundStyle(Theme.text.opacity(0.8))
                 }
             }
@@ -111,7 +130,7 @@ struct ProfileView: View {
                 showEditSheet = true
             } label: {
                 Image(systemName: "pencil.circle.fill")
-                    .font(.title)
+                    .titleStyle()
                     .foregroundStyle(Theme.text.opacity(0.5))
             }
         }
@@ -123,14 +142,14 @@ struct ProfileView: View {
         StigmaCard {
             HStack {
                 Text("Your Profile")
-                    .font(.headline.weight(.heavy))
+                    .headlineStyle()
                     .foregroundStyle(Theme.text)
                 Spacer()
                 Button {
                     showEditSheet = true
                 } label: {
                     Text("Edit")
-                        .font(.caption.weight(.bold))
+                        .labelStyle()
                         .foregroundStyle(Theme.accent)
                 }
             }
@@ -153,6 +172,30 @@ struct ProfileView: View {
                 if !bestTimeRaw.isEmpty {
                     profileRow(icon: "clock.fill", label: "Best time", value: bestTimeRaw)
                 }
+                
+                if !interestsRaw.isEmpty,
+                   let data = interestsRaw.data(using: .utf8),
+                   let interests = try? JSONDecoder().decode([String].self, from: data) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "heart.fill")
+                                .footnoteStyle(size: 13)
+                                .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
+                                .foregroundStyle(Theme.accent)
+                                .frame(width: 20)
+                            Text("Interests")
+                                .labelStyle()
+                                .foregroundStyle(Theme.text.opacity(0.5))
+                        }
+                        FlowLayout(spacing: 6) {
+                            ForEach(interests, id: \.self) { raw in
+                                if let interest = Interest.allCases.first(where: { $0.rawValue == raw }) {
+                                    PillBadge(text: interest.rawValue, tint: Theme.accent, systemImage: interest.icon)
+                                }
+                            }
+                        }
+                    }
+                }
             }
             .padding(.top, 4)
         }
@@ -161,16 +204,17 @@ struct ProfileView: View {
     private func profileRow(icon: String, label: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.footnote.weight(.semibold))
+                .footnoteStyle(size: 13)
+                .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                 .foregroundStyle(Theme.accent)
                 .frame(width: 20)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
-                    .font(.caption.weight(.bold))
+                    .labelStyle()
                     .foregroundStyle(Theme.text.opacity(0.5))
                 Text(value)
-                    .font(.subheadline.weight(.medium))
+                    .subheadlineStyle()
                     .foregroundStyle(Theme.text)
             }
         }
@@ -180,11 +224,12 @@ struct ProfileView: View {
         StigmaCard {
             HStack {
                 Text("Journey")
-                    .font(.headline.weight(.heavy))
+                    .headlineStyle()
                     .foregroundStyle(Theme.text)
                 Spacer()
                 Text("\(sampleUser.milestones.filter({ $0.achieved }).count) milestones")
-                    .font(.footnote.weight(.semibold))
+                    .footnoteStyle(size: 13)
+                    .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(Theme.text.opacity(0.6))
             }
             
@@ -206,11 +251,12 @@ struct ProfileView: View {
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(milestone.title)
-                                .font(.subheadline.weight(.bold))
+                                .subheadlineStyle(size: 15)
+                                .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                                 .foregroundStyle(milestone.achieved ? Theme.text : Theme.text.opacity(0.6))
                             
                             Text(milestone.description)
-                                .font(.footnote)
+                                .footnoteStyle()
                                 .foregroundStyle(Theme.text.opacity(0.6))
                         }
                         .padding(.top, -2) // Align text with circle
@@ -226,7 +272,7 @@ struct ProfileView: View {
     private var charmSettingsCard: some View {
         StigmaCard {
             Text("Stigma Charm")
-                .font(.headline.weight(.heavy))
+                .headlineStyle()
                 .foregroundStyle(Theme.text)
             
             VStack(alignment: .leading, spacing: 16) {
@@ -236,7 +282,7 @@ struct ProfileView: View {
                         .fill(Theme.green)
                         .frame(width: 8, height: 8)
                     Text(sampleUser.companionName != nil ? "Linked to \(sampleUser.companionName!)" : "No companion linked")
-                        .font(.subheadline.weight(.medium))
+                        .subheadlineStyle()
                         .foregroundStyle(Theme.text)
                 }
                 .padding(.top, 8)
@@ -247,31 +293,31 @@ struct ProfileView: View {
                 // Signal Meanings
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Squeeze Signals")
-                        .font(.footnote.weight(.bold))
+                        .labelStyle()
                         .foregroundStyle(Theme.text.opacity(0.6))
                     
                     HStack {
                         Text("Quick squeeze")
-                            .font(.subheadline.weight(.medium))
+                            .subheadlineStyle()
                         Spacer()
                         Text("I'm okay")
-                            .font(.subheadline)
+                            .subheadlineStyle()
                             .foregroundStyle(Theme.text.opacity(0.6))
                     }
                     HStack {
                         Text("Long squeeze")
-                            .font(.subheadline.weight(.medium))
+                            .subheadlineStyle()
                         Spacer()
                         Text("Come find me")
-                            .font(.subheadline)
+                            .subheadlineStyle()
                             .foregroundStyle(Theme.text.opacity(0.6))
                     }
                     HStack {
                         Text("Double squeeze")
-                            .font(.subheadline.weight(.medium))
+                            .subheadlineStyle()
                         Spacer()
                         Text("Let's leave")
-                            .font(.subheadline)
+                            .subheadlineStyle()
                             .foregroundStyle(Theme.text.opacity(0.6))
                     }
                 }
@@ -283,7 +329,7 @@ struct ProfileView: View {
     private var communityStatsCard: some View {
         StigmaCard {
             Text("Community")
-                .font(.headline.weight(.heavy))
+                .headlineStyle()
                 .foregroundStyle(Theme.text)
             
             VStack(spacing: 16) {
@@ -296,7 +342,7 @@ struct ProfileView: View {
                             .foregroundStyle(Theme.accent)
                     }
                     Text("47 members active in London this week")
-                        .font(.subheadline.weight(.medium))
+                        .subheadlineStyle()
                     Spacer()
                 }
                 
@@ -309,7 +355,7 @@ struct ProfileView: View {
                             .foregroundStyle(Theme.green)
                     }
                     Text("12 tulip venues near you")
-                        .font(.subheadline.weight(.medium))
+                        .subheadlineStyle()
                     Spacer()
                 }
             }
@@ -330,15 +376,16 @@ struct ProfileView: View {
                             .fill(Theme.accent.opacity(0.15))
                             .frame(width: 44, height: 44)
                         Image(systemName: "sparkles")
-                            .font(.title3.weight(.semibold))
+                            .titleStyle(size: 20)
                             .foregroundStyle(Theme.accent)
                     }
                     
                     VStack(alignment: .leading, spacing: 3) {
                         Text("My Symptom Profile")
-                            .font(.subheadline.weight(.bold))
+                            .subheadlineStyle(size: 15)
+                            .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                         Text("Optional · Improves your matches")
-                            .font(.caption)
+                            .captionStyle()
                             .foregroundStyle(Theme.text.opacity(0.5))
                     }
                     .foregroundStyle(Theme.text)
@@ -346,7 +393,8 @@ struct ProfileView: View {
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
+                        .footnoteStyle(size: 13)
+                        .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text.opacity(0.3))
                 }
                 .padding()
@@ -359,15 +407,20 @@ struct ProfileView: View {
             Toggle(isOn: $isDiscoverable) {
                 HStack(spacing: 12) {
                     Image(systemName: "eye")
-                        .font(.body.weight(.semibold))
+                        .bodyStyle()
+                        .stigmaFont(size: 17, name: "AtkinsonHyperlegible-Bold")
                         .frame(width: 24)
                     Text("Discoverable to members")
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                 }
                 .foregroundStyle(Theme.text)
             }
             .tint(Theme.accent)
             .padding()
+            .onChange(of: isDiscoverable) { _ in
+                HapticFeedback.selection()
+            }
             Divider().background(Theme.text.opacity(0.1)).padding(.leading, 44)
             settingRow(icon: "info.circle", title: "About Stigma")
             
@@ -375,17 +428,21 @@ struct ProfileView: View {
             
             // Sign Out
             Button {
+                HapticFeedback.warning()
                 showSignOutAlert = true
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "rectangle.portrait.and.arrow.right")
-                        .font(.body.weight(.semibold))
+                        .bodyStyle()
+                        .stigmaFont(size: 17, name: "AtkinsonHyperlegible-Bold")
                         .frame(width: 24)
                     Text("Sign Out")
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
+                        .footnoteStyle(size: 13)
+                        .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text.opacity(0.3))
                 }
                 .foregroundStyle(.orange)
@@ -396,17 +453,21 @@ struct ProfileView: View {
             
             // Delete Account
             Button {
+                HapticFeedback.warning()
                 showDeleteAlert = true
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "trash.fill")
-                        .font(.body.weight(.semibold))
+                        .bodyStyle()
+                        .stigmaFont(size: 17, name: "AtkinsonHyperlegible-Bold")
                         .frame(width: 24)
                     Text("Delete Account")
-                        .font(.subheadline.weight(.semibold))
+                        .subheadlineStyle(size: 15)
+                        .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
+                        .footnoteStyle(size: 13)
+                        .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                         .foregroundStyle(Theme.text.opacity(0.3))
                 }
                 .foregroundStyle(.red)
@@ -422,13 +483,16 @@ struct ProfileView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.body.weight(.semibold))
+                    .bodyStyle()
+                    .stigmaFont(size: 17, name: "AtkinsonHyperlegible-Bold")
                     .frame(width: 24)
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .subheadlineStyle(size: 15)
+                    .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
+                    .footnoteStyle(size: 13)
+                    .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(Theme.text.opacity(0.3))
             }
             .foregroundStyle(isDestructive ? .red : Theme.text)

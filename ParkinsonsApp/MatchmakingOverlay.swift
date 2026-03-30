@@ -15,12 +15,14 @@ enum MatchmakingPhase {
 
 struct MatchmakingOverlay: View {
     @Binding var isVisible: Bool
-    
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var phase: MatchmakingPhase = .scanning
     @State private var radarScale: CGFloat = 0.5
     @State private var asteriskScale: CGFloat = 1.0
     @State private var isRevealed: Bool = false
-    
+
     // Animate radar rings
     @State private var ring1Scale: CGFloat = 0.8
     @State private var ring1Opacity: Double = 0.8
@@ -31,7 +33,7 @@ struct MatchmakingOverlay: View {
         ZStack {
             // Darken background
             Color.black.opacity(0.4)
-                .ignoresSafeArea()
+                .ignoresSafeArea()  	
                 .onTapGesture {
                     if phase == .found { dismiss() }
                 }
@@ -42,10 +44,9 @@ struct MatchmakingOverlay: View {
                 VStack {
                     Spacer()
                     foundAndRevealCard
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 80)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .ignoresSafeArea(edges: .bottom)
             }
         }
         .onAppear {
@@ -75,16 +76,17 @@ struct MatchmakingOverlay: View {
                     .frame(width: 80, height: 80)
                     .scaleEffect(asteriskScale)
                 
-                Image(systemName: "asterisk")
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(.white)
+                Image("Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
                     .rotationEffect(.degrees(asteriskScale > 1.05 ? 15 : 0))
             }
             .frame(width: 250, height: 250)
             
             Text("Looking for community members nearby...")
-                .font(.headline.weight(.medium))
-                .fontDesign(.rounded)
+                .headlineStyle()
+
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
@@ -97,7 +99,7 @@ struct MatchmakingOverlay: View {
                 // Found (Anonymized) Content
                 VStack(spacing: 16) {
                     Text("Someone from the community is nearby")
-                        .font(.headline.weight(.bold))
+                        .headlineStyle()
                         .foregroundStyle(Theme.text)
                         .multilineTextAlignment(.center)
                         .padding(.bottom, 8)
@@ -108,21 +110,21 @@ struct MatchmakingOverlay: View {
                                 .fill(Theme.accent.opacity(0.2))
                                 .frame(width: 50, height: 50)
                             Text(sampleMatch.initial)
-                                .font(.title2.weight(.bold))
+                                .titleStyle(size: 22)
                                 .foregroundStyle(Theme.accent)
                         }
                         
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Diagnosed \(sampleMatch.yearsSinceDiagnosis) years ago")
-                                .font(.subheadline.weight(.medium))
+                                .subheadlineStyle()
                             Text(sampleMatch.stage.rawValue)
-                                .font(.footnote)
+                                .footnoteStyle()
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
                                 .background(Theme.pill(tint: Theme.accent))
                             
                             Text("Shared interests: \(sampleMatch.sharedInterests.joined(separator: ", "))")
-                                .font(.footnote.weight(.medium))
+                                .footnoteStyle()
                                 .foregroundStyle(Theme.text.opacity(0.8))
                                 .padding(.top, 4)
                         }
@@ -136,24 +138,32 @@ struct MatchmakingOverlay: View {
                     // Action Buttons
                     VStack(spacing: 12) {
                         Button {
+                            HapticFeedback.impact(.heavy)
                             acceptMatch()
                         } label: {
                             Text("Say hello")
-                                .font(.headline.weight(.bold))
+                                .headlineStyle()
                                 .frame(maxWidth: .infinity)
-                                .padding(16)
+                                .frame(minHeight: A11ySize.minTouchTarget)
                                 .background(Theme.accent)
                                 .foregroundStyle(.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
-                        
+                        .accessibilityLabel("Say hello")
+                        .accessibilityHint("Reveals who this community member is")
+
                         Button {
+                            HapticFeedback.selection()
                             dismiss()
                         } label: {
                             Text("Not now")
-                                .font(.subheadline.weight(.medium))
+                                .subheadlineStyle()
                                 .foregroundStyle(Theme.text.opacity(0.6))
+                                .frame(maxWidth: .infinity)
+                                .frame(minHeight: A11ySize.minTouchTarget)
                         }
+                        .accessibilityLabel("Not now")
+                        .accessibilityHint("Dismisses this match")
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 16)
@@ -163,16 +173,16 @@ struct MatchmakingOverlay: View {
                 // Revealed Content
                 VStack(spacing: 16) {
                     Image(systemName: "sparkles")
-                        .font(.largeTitle)
+                        .titleStyle(size: 34)
                         .foregroundStyle(Theme.accent)
                         .padding(.top, 8)
                     
                     Text(sampleMatch.fullName)
-                        .font(.title.weight(.heavy))
+                        .titleStyle()
                         .foregroundStyle(Theme.text)
                     
                     Text("Diagnosed 2024 · \(sampleMatch.stage.rawValue)")
-                        .font(.subheadline.weight(.medium))
+                        .subheadlineStyle()
                         .foregroundStyle(Theme.text.opacity(0.8))
                     
                     VStack(alignment: .leading, spacing: 12) {
@@ -189,7 +199,8 @@ struct MatchmakingOverlay: View {
                             Spacer()
                         }
                     }
-                    .font(.footnote.weight(.semibold))
+                    .footnoteStyle(size: 13)
+                    .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(Theme.text)
                     .padding(16)
                     .background(Theme.glassBackground)
@@ -199,24 +210,32 @@ struct MatchmakingOverlay: View {
                     
                     VStack(spacing: 12) {
                         Button {
+                            HapticManager.shared.softDoublePulse()
                             dismiss()
                         } label: {
                             Text("Send a message")
-                                .font(.headline.weight(.bold))
+                                .headlineStyle()
                                 .frame(maxWidth: .infinity)
-                                .padding(16)
+                                .frame(minHeight: A11ySize.minTouchTarget)
                                 .background(Theme.accent)
                                 .foregroundStyle(.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
-                        
+                        .accessibilityLabel("Send a message to \(sampleMatch.fullName)")
+                        .accessibilityHint("Opens a message conversation")
+
                         Button {
+                            HapticFeedback.selection()
                             dismiss()
                         } label: {
                             Text("Maybe later")
-                                .font(.subheadline.weight(.medium))
+                                .subheadlineStyle()
                                 .foregroundStyle(Theme.text.opacity(0.6))
+                                .frame(maxWidth: .infinity)
+                                .frame(minHeight: A11ySize.minTouchTarget)
                         }
+                        .accessibilityLabel("Maybe later")
+                        .accessibilityHint("Dismisses without messaging")
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 16)
@@ -236,17 +255,23 @@ struct MatchmakingOverlay: View {
     // MARK: - Logic
     
     private func startScanning() {
+        if reduceMotion {
+            // Skip animation, go straight to found state
+            phase = .found
+            return
+        }
+
         // Pulse asterisk
         withAnimation(.easeInOut(duration: 1.0).repeatForever()) {
             asteriskScale = 1.1
         }
-        
+
         // Radar ring 1
         withAnimation(.easeOut(duration: 2.0).repeatForever(autoreverses: false)) {
             ring1Scale = 2.5
             ring1Opacity = 0.0
         }
-        
+
         // Radar ring 2 (delayed)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             withAnimation(.easeOut(duration: 2.0).repeatForever(autoreverses: false)) {
@@ -254,9 +279,10 @@ struct MatchmakingOverlay: View {
                 ring2Opacity = 0.0
             }
         }
-        
+
         // Simulate finding someone after 2 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            HapticManager.shared.warmDoublePulse()
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 phase = .found
             }
@@ -264,6 +290,7 @@ struct MatchmakingOverlay: View {
     }
     
     private func acceptMatch() {
+        HapticManager.shared.success()
         withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
             phase = .revealed
         }
@@ -283,3 +310,4 @@ struct MatchmakingOverlay: View {
 #Preview {
     MatchmakingOverlay(isVisible: .constant(true))
 }
+

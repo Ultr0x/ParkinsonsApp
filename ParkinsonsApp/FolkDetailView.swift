@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FolkDetailView: View {
     let folk: CommunityFolk
+    var fromDiscovery: Bool = false
 
     private var places: [CommunityPlace] {
         placesFor(folkID: folk.id)
@@ -19,10 +20,21 @@ struct FolkDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                profileHeader
-                content
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    profileHeader
+                    content
+                    
+                    if fromDiscovery {
+                        // Extra bottom padding for the floating button
+                        Spacer().frame(height: 100)
+                    }
+                }
+            }
+            
+            if fromDiscovery {
+                sayHelloButton
             }
         }
         .background(Theme.background)
@@ -44,20 +56,18 @@ struct FolkDetailView: View {
                     .fill(folk.avatarColor.opacity(0.25))
                     .frame(width: 100, height: 100)
                 Text(folk.initials)
-                    .font(.system(size: 40, weight: .heavy))
-                    .fontDesign(.rounded)
+                    .stigmaFont(size: 40, name: "AtkinsonHyperlegible-Bold")
                     .foregroundStyle(folk.avatarColor)
             }
 
             Text("\(folk.firstName) \(folk.lastName)")
-                .font(.title2.weight(.heavy))
-                .fontDesign(.rounded)
+                .logoStyle(size: 32)
                 .foregroundStyle(Theme.text)
 
             // Quick stats
             HStack(spacing: 16) {
                 quickStat(value: "Age \(folk.age)", icon: "person.fill", color: Theme.text)
-                quickStat(value: folk.stage.rawValue, icon: "chart.bar.fill", color: stageColor(folk.stage))
+                quickStat(value: folk.stage.rawValue, icon: folk.stage.icon, color: stageColor(folk.stage))
                 quickStat(value: "\(folk.yearsSinceDiagnosis)y", icon: "calendar", color: Theme.accent)
             }
         }
@@ -69,10 +79,10 @@ struct FolkDetailView: View {
     private func quickStat(value: String, icon: String, color: Color) -> some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.footnote)
+                .footnoteStyle()
                 .foregroundStyle(color)
             Text(value)
-                .font(.caption.weight(.bold))
+                .labelStyle()
                 .foregroundStyle(Theme.text)
         }
         .frame(minWidth: 70)
@@ -90,10 +100,10 @@ struct FolkDetailView: View {
             // Bio
             StigmaCard {
                 Text("About")
-                    .font(.headline.weight(.heavy))
+                    .headlineStyle()
                     .foregroundStyle(Theme.text)
                 Text(folk.bio)
-                    .font(.subheadline)
+                    .subheadlineStyle()
                     .foregroundStyle(Theme.text.opacity(0.85))
                     .lineSpacing(4)
             }
@@ -101,12 +111,12 @@ struct FolkDetailView: View {
             // Interests
             StigmaCard {
                 Text("Interests")
-                    .font(.headline.weight(.heavy))
+                    .headlineStyle(size: 18)
                     .foregroundStyle(Theme.text)
 
                 FlowLayout(spacing: 6) {
                     ForEach(folk.interests, id: \.self) { interest in
-                        PillBadge(text: interest, tint: folk.avatarColor)
+                        PillBadge(text: interest.rawValue, tint: folk.avatarColor, systemImage: interest.icon)
                     }
                 }
             }
@@ -114,7 +124,7 @@ struct FolkDetailView: View {
             // Experiences & Journey
             StigmaCard {
                 Text("Experiences")
-                    .font(.headline.weight(.heavy))
+                    .headlineStyle(size: 18)
                     .foregroundStyle(Theme.text)
                 
                 VStack(alignment: .leading, spacing: 10) {
@@ -124,11 +134,12 @@ struct FolkDetailView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack(spacing: 8) {
                                 Image(systemName: "eye")
-                                    .font(.footnote.weight(.semibold))
+                                    .footnoteStyle(size: 13)
+                                    .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                                     .foregroundStyle(Theme.accent)
                                     .frame(width: 20)
                                 Text("When out & about")
-                                    .font(.caption.weight(.bold))
+                                    .labelStyle()
                                     .foregroundStyle(Theme.text.opacity(0.5))
                             }
                             FlowLayout(spacing: 6) {
@@ -160,15 +171,16 @@ struct FolkDetailView: View {
     private func experienceRow(icon: String, label: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon)
-                .font(.footnote.weight(.semibold))
+                .footnoteStyle(size: 13)
+                .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                 .foregroundStyle(Theme.accent)
                 .frame(width: 20)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
-                    .font(.caption.weight(.bold))
+                    .labelStyle()
                     .foregroundStyle(Theme.text.opacity(0.5))
                 Text(value)
-                    .font(.subheadline.weight(.medium))
+                    .subheadlineStyle(size: 15)
                     .foregroundStyle(Theme.text)
             }
         }
@@ -179,7 +191,7 @@ struct FolkDetailView: View {
     private var placesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Places \(folk.firstName) attends")
-                .font(.headline.weight(.heavy))
+                .headlineStyle(size: 18)
                 .foregroundStyle(Theme.text)
 
             ForEach(places) { place in
@@ -190,21 +202,23 @@ struct FolkDetailView: View {
                                 .fill(place.category.color.opacity(0.15))
                                 .frame(width: 44, height: 44)
                             Image(systemName: place.category.icon)
-                                .font(.headline)
+                                .headlineStyle()
                                 .foregroundStyle(place.category.color)
                         }
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(place.name)
-                                .font(.subheadline.weight(.bold))
+                                .subheadlineStyle(size: 15)
+                                .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                                 .foregroundStyle(Theme.text)
                                 .lineLimit(1)
                             HStack(spacing: 6) {
                                 Text(place.category.rawValue)
-                                    .font(.caption2.weight(.bold))
+                                    .caption2Style()
+                                    .stigmaFont(size: 11, name: "AtkinsonHyperlegible-Bold")
                                     .foregroundStyle(place.category.color)
                                 Text(place.schedule)
-                                    .font(.caption2)
+                                    .caption2Style()
                                     .foregroundStyle(Theme.text.opacity(0.6))
                                     .lineLimit(1)
                             }
@@ -213,7 +227,8 @@ struct FolkDetailView: View {
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
+                            .footnoteStyle(size: 13)
+                            .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                             .foregroundStyle(Theme.text.opacity(0.3))
                     }
                     .padding(12)
@@ -229,7 +244,7 @@ struct FolkDetailView: View {
     private var activitiesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Upcoming activities")
-                .font(.headline.weight(.heavy))
+                .headlineStyle(size: 18)
                 .foregroundStyle(Theme.text)
 
             ForEach(activities) { activity in
@@ -238,28 +253,30 @@ struct FolkDetailView: View {
                     HStack(spacing: 12) {
                         VStack(spacing: 2) {
                             Text(activity.date.formatted(.dateTime.day()))
-                                .font(.title3.weight(.heavy))
+                                .titleStyle(size: 20)
                                 .foregroundStyle(activityPlace?.category.color ?? Theme.accent)
                             Text(activity.date.formatted(.dateTime.month(.abbreviated)))
-                                .font(.system(size: 10).weight(.bold))
+                                .stigmaFont(size: 10, name: "AtkinsonHyperlegible-Bold")
                                 .foregroundStyle(Theme.text.opacity(0.6))
                         }
                         .frame(width: 40)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(activity.name)
-                                .font(.subheadline.weight(.bold))
+                                .subheadlineStyle(size: 15)
+                                .stigmaFont(size: 15, name: "AtkinsonHyperlegible-Bold")
                                 .foregroundStyle(Theme.text)
                                 .lineLimit(1)
                             Text(activity.time)
-                                .font(.caption.weight(.semibold))
+                                .labelStyle()
                                 .foregroundStyle(Theme.text.opacity(0.7))
                         }
 
                         Spacer()
 
                         Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
+                            .footnoteStyle(size: 13)
+                            .stigmaFont(size: 13, name: "AtkinsonHyperlegible-Bold")
                             .foregroundStyle(Theme.text.opacity(0.3))
                     }
                     .padding(12)
@@ -276,6 +293,32 @@ struct FolkDetailView: View {
         case .mid: return Theme.orange
         case .advanced: return Theme.accent
         }
+    }
+
+    // MARK: - Discovery Overlay
+    
+    private var sayHelloButton: some View {
+        Button {
+            HapticManager.shared.softDoublePulse()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "hand.wave.fill")
+                    .headlineStyle()
+                Text("Say Hello to \(folk.firstName)")
+                    .headlineStyle()
+            }
+            .foregroundStyle(.white)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(folk.avatarColor)
+                    .shadow(color: folk.avatarColor.opacity(0.4), radius: 12, y: 6)
+            )
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 }
 
